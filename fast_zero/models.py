@@ -51,7 +51,7 @@ class ClinicalHistory:
     __tablename__ = 'clinical_histories'
 
     history_id: Mapped[int] = mapped_column(init=False, primary_key=True)
-    patient_id: Mapped[int] = mapped_column(ForeignKey('patients.id'))
+    patient_id: Mapped[int] = mapped_column(ForeignKey('patients.patient_id'))
     main_complaint: Mapped[str]
     disease_history: Mapped[str]
     lifestyle_habits: Mapped[str]
@@ -67,7 +67,7 @@ class ClinicalExamination:
     __tablename__ = 'clinical_examinations'
 
     exam_id: Mapped[int] = mapped_column(init=False, primary_key=True)
-    patient_id: Mapped[int] = mapped_column(ForeignKey('patients.id'))
+    patient_id: Mapped[int] = mapped_column(ForeignKey('patients.patient_id'))
     exam_details: Mapped[str]
 
     patient = relationship('Patient', back_populates='clinical_examination')
@@ -78,10 +78,10 @@ class ComplementaryExams:
     __tablename__ = 'complementary_exams'
 
     exam_id: Mapped[int] = mapped_column(init=False, primary_key=True)
-    patient_id: Mapped[int] = mapped_column(ForeignKey('patients.id'))
+    patient_id: Mapped[int] = mapped_column(ForeignKey('patients.patient_id'))
     exam_details: Mapped[str]
 
-    patient = relationship('Patient', back_populates='ccomplementary_exams')
+    patient = relationship('Patient', back_populates='complementary_exams')
 
 
 @table_registry.mapped_as_dataclass
@@ -89,7 +89,7 @@ class PhysiotherapyDiagosis:
     __tablename__ = 'physiotherapy_diagnosis'
 
     diagnosis_id: Mapped[int] = mapped_column(init=False, primary_key=True)
-    patient_id: Mapped[int] = mapped_column(ForeignKey('patients.id'))
+    patient_id: Mapped[int] = mapped_column(ForeignKey('patients.patient_id'))
     diagnosis_details: Mapped[str]
 
     patient = relationship('Patient', back_populates='physiotherapy_diagnosis')
@@ -100,7 +100,7 @@ class Prognosis:
     __tablename__ = 'prognosis'
 
     prognosis_id: Mapped[int] = mapped_column(init=False, primary_key=True)
-    patient_id: Mapped[int] = mapped_column(ForeignKey('patients.id'))
+    patient_id: Mapped[int] = mapped_column(ForeignKey('patients.patient_id'))
     prognosis_details: Mapped[str]
 
     patient = relationship('Patient', back_populates='prognosis')
@@ -111,7 +111,7 @@ class TreatmentPlan:
     __tablename__ = 'treatments_plan'
 
     plan_id: Mapped[int] = mapped_column(init=False, primary_key=True)
-    patient_id: Mapped[int] = mapped_column(ForeignKey('patients.id'))
+    patient_id: Mapped[int] = mapped_column(ForeignKey('patients.patient_id'))
     objectives: Mapped[str]
     probable_sessions: Mapped[int]
     procedures: Mapped[str]
@@ -136,8 +136,8 @@ class EvolutionRecords:
     __tablename__ = 'evolution_records'
 
     record_id: Mapped[int] = mapped_column(init=False, primary_key=True)
-    patient_id: Mapped[int] = mapped_column(ForeignKey('patients.id'))
-    professional_id: Mapped[int] = mapped_column(ForeignKey('professionals.id'))
+    patient_id: Mapped[int] = mapped_column(ForeignKey('patients.patient_id'))
+    professional_id: Mapped[int] = mapped_column(ForeignKey('professionals.professional_id'))
     date = Mapped[datetime]
     procedures: Mapped[str]
     complications: Mapped[str]
