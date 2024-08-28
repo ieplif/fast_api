@@ -128,9 +128,7 @@ def test_delete_clinical_history(session, client, token):
     session.commit()
     session.refresh(clinical_history)
 
-    response = client.delete(
-        f'/clinical-history/{clinical_history.history_id}', headers={'Authorization': f'Bearer {token}'}
-    )
+    response = client.delete(f'/clinical-history/{clinical_history.history_id}', headers={'Authorization': f'Bearer {token}'})
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {'message': 'Clinical History has been deleted successfully.'}

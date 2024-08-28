@@ -2,105 +2,272 @@ from http import HTTPStatus
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from fast_zero import crud, schemas
 from fast_zero.database import get_session
-from fast_zero.models import Patient
-from fast_zero.schemas import (
-    Message,
-    PatientFilter,
-    PatientList,
-    PatientPublic,
-    PatientSchema,
-    PatientUpdate,
-)
 
-router = APIRouter(prefix='/patients', tags=['patients'])
+router = APIRouter()
 
 T_Session = Annotated[Session, Depends(get_session)]
 
 
-@router.post('/', response_model=PatientPublic)
-def create_patient(
-    patient: PatientSchema,
-    session: T_Session,
-):
-    db_patient = Patient(
-        full_name=patient.full_name,
-        age=patient.age,
-        place_of_birth=patient.place_of_birth,
-        marital_status=patient.marital_status,
-        gender=patient.gender,
-        profession=patient.profession,
-        residential_address=patient.residential_address,
-        commercial_address=patient.commercial_address,
-    )
-    session.add(db_patient)
-    session.commit()
-    session.refresh(db_patient)
+# Routes for Patients
+@router.post('/patients/', response_model=schemas.Patient, tags=['patients'])
+def create_patient(patient: schemas.PatientCreate, db: T_Session):
+    return crud.create_patient(db=db, patient=patient)
 
+
+@router.get('/patients/{patient_id}', response_model=schemas.Patient, tags=['patients'])
+def read_patient(patient_id: int, db: T_Session):
+    db_patient = crud.get_patient(db, patient_id=patient_id)
+    if db_patient is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Patient not found')
     return db_patient
 
 
-@router.get('/', response_model=PatientList)
-def list_patients(
-    session: T_Session,
-    filters: PatientFilter = Depends(),
-):
-    query = session.query(Patient)
-
-    if filters.full_name:
-        query = query.filter(Patient.full_name.ilike(f'%{filters.full_name}%'))
-    if filters.age:
-        query = query.filter(Patient.age == filters.age)
-    if filters.place_of_birth:
-        query = query.filter(Patient.place_of_birth.ilike(f'%{filters.place_of_birth}%'))
-    if filters.marital_status:
-        query = query.filter(Patient.marital_status.ilike(f'%{filters.marital_status}%'))
-    if filters.gender:
-        query = query.filter(Patient.gender.ilike(f'%{filters.gender}%'))
-    if filters.profession:
-        query = query.filter(Patient.profession.ilike(f'%{filters.profession}%'))
-    if filters.residential_address:
-        query = query.filter(Patient.residential_address.ilike(f'%{filters.residential_address}%'))
-    if filters.commercial_address:
-        query = query.filter(Patient.commercial_address.ilike(f'%{filters.commercial_address}%'))
-
-    if filters.offset is not None:
-        query = query.offset(filters.offset)
-    if filters.limit is not None:
-        query = query.limit(filters.limit)
-
-    patients = session.scalars(query.offset(filters.offset).limit(filters.limit)).all()
-    return {'patients': patients}
+@router.get('/patients/', response_model=list[schemas.Patient], tags=['patients'])
+def read_patients(db: T_Session, skip: int = 0, limit: int = 10):
+    patients = crud.get_patients(db, skip=skip, limit=limit)
+    return patients
 
 
-@router.delete('/{patient_id}', response_model=Message)
-def delete_patient(patient_id: int, session: T_Session):
-    patient = session.scalar(select(Patient).where(Patient.id == patient_id))
-
-    if not patient:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Task not found.')
-
-    session.delete(patient)
-    session.commit()
-
-    return {'message': 'Task has been deleted successfully.'}
-
-
-@router.patch('/{patient_id}', response_model=PatientPublic)
-def patch_patient(patient_id: int, session: T_Session, patient: PatientUpdate):
-    db_patient = session.scalar(select(Patient).where(Patient.id == patient_id))
-
-    if not db_patient:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Task not found.')
-
-    for key, value in patient.model_dump(exclude_unset=True).items():
-        setattr(db_patient, key, value)
-
-    session.add(db_patient)
-    session.commit()
-    session.refresh(db_patient)
-
+@router.put('/patients/{patient_id}', response_model=schemas.Patient, tags=['patients'])
+def update_patient(patient_id: int, patient: schemas.PatientCreate, db: T_Session):
+    db_patient = crud.update_patient(db=db, patient_id=patient_id, patient=patient)
+    if db_patient is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Patient not found')
     return db_patient
+
+
+@router.delete('/patients/{patient_id}', response_model=schemas.Patient, tags=['patients'])
+def delete_patient(patient_id: int, db: T_Session):
+    db_patient = crud.delete_patient(db=db, patient_id=patient_id)
+    if db_patient is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Patient not found')
+    return db_patient
+
+
+# Routes for Clinical History
+@router.post('/patients/{patient_id}/clinical_history/', response_model=schemas.ClinicalHistory, tags=['clinical_history'])
+def create_clinical_history_for_patient(patient_id: int, clinical_history: schemas.ClinicalHistoryCreate, db: T_Session):
+    return crud.create_clinical_history(db=db, clinical_history=clinical_history, patient_id=patient_id)
+
+
+@router.get('/patients/{patient_id}/clinical_history/', response_model=list[schemas.ClinicalHistory], tags=['clinical_history'])
+def read_clinical_history_for_patient(db: T_Session, patient_id: int, skip: int = 0, limit: int = 10):
+    return crud.get_clinical_histories(db=db, patient_id=patient_id, skip=skip, limit=limit)
+
+
+@router.put('/clinical_history/{history_id}', response_model=schemas.ClinicalHistory, tags=['clinical_history'])
+def update_clinical_history(history_id: int, clinical_history: schemas.ClinicalHistoryCreate, db: T_Session):
+    db_clinical_history = crud.update_clinical_history(db=db, history_id=history_id, clinical_history=clinical_history)
+    if db_clinical_history is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Clinical History not found')
+    return db_clinical_history
+
+
+@router.delete('/clinical_history/{history_id}', response_model=schemas.ClinicalHistory, tags=['clinical_history'])
+def delete_clinical_history(history_id: int, db: T_Session):
+    db_clinical_history = crud.delete_clinical_history(db=db, history_id=history_id)
+    if db_clinical_history is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Clinical History not found')
+    return db_clinical_history
+
+
+# Routes for Clinical Examination
+@router.post('/patients/{patient_id}/clinical_examination/', response_model=schemas.ClinicalExamination, tags=['clinical_examination'])
+def create_clinical_examination_for_patient(patient_id: int, clinical_examination: schemas.ClinicalExaminationCreate, db: T_Session):
+    return crud.create_clinical_examination(db=db, clinical_examination=clinical_examination, patient_id=patient_id)
+
+
+@router.get('/patients/{patient_id}/clinical_examination/', response_model=list[schemas.ClinicalExamination], tags=['clinical_examination'])
+def read_clinical_examination_for_patient(db: T_Session, patient_id: int, skip: int = 0, limit: int = 10):
+    return crud.get_clinical_examinations(db=db, patient_id=patient_id, skip=skip, limit=limit)
+
+
+@router.put('/clinical_examination/{exam_id}', response_model=schemas.ClinicalExamination, tags=['clinical_examination'])
+def update_clinical_examination(exam_id: int, clinical_examination: schemas.ClinicalExaminationCreate, db: T_Session):
+    db_clinical_examination = crud.update_clinical_examination(db=db, exam_id=exam_id, clinical_examination=clinical_examination)
+    if db_clinical_examination is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Clinical Examination not found')
+    return db_clinical_examination
+
+
+@router.delete('/clinical_examination/{exam_id}', response_model=schemas.ClinicalExamination, tags=['clinical_examination'])
+def delete_clinical_examination(exam_id: int, db: T_Session):
+    db_clinical_examination = crud.delete_clinical_examination(db=db, exam_id=exam_id)
+    if db_clinical_examination is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Clinical Examination not found')
+    return db_clinical_examination
+
+
+# Routes for Complementary Exams
+@router.post('/patients/{patient_id}/complementary_exams/', response_model=schemas.ComplementaryExams, tags=['complementary_exams'])
+def create_complementary_exams_for_patient(patient_id: int, complementary_exams: schemas.ComplementaryExamsCreate, db: T_Session):
+    return crud.create_complementary_exams(db=db, complementary_exams=complementary_exams, patient_id=patient_id)
+
+
+@router.get('/patients/{patient_id}/complementary_exams/', response_model=list[schemas.ComplementaryExams], tags=['complementary_exams'])
+def read_complementary_exams_for_patient(db: T_Session, patient_id: int, skip: int = 0, limit: int = 10):
+    return crud.get_complementary_exams(db=db, patient_id=patient_id, skip=skip, limit=limit)
+
+
+@router.put('/complementary_exams/{exam_id}', response_model=schemas.ComplementaryExams, tags=['complementary_exams'])
+def update_complementary_exams(exam_id: int, complementary_exams: schemas.ComplementaryExamsCreate, db: T_Session):
+    db_complementary_exams = crud.update_complementary_exams(db=db, exam_id=exam_id, complementary_exams=complementary_exams)
+    if db_complementary_exams is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Complementary Exams not found')
+    return db_complementary_exams
+
+
+@router.delete('/complementary_exams/{exam_id}', response_model=schemas.ComplementaryExams, tags=['complementary_exams'])
+def delete_complementary_exams(exam_id: int, db: T_Session):
+    db_complementary_exams = crud.delete_complementary_exams(db=db, exam_id=exam_id)
+    if db_complementary_exams is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Complementary Exams not found')
+    return db_complementary_exams
+
+
+# Routes for Physiotherapy Diagnosis
+@router.post('/patients/{patient_id}/physiotherapy_diagnosis/', response_model=schemas.PhysiotherapyDiagnosis, tags=['physiotherapy_diagnosis'])
+def create_physiotherapy_diagnosis_for_patient(patient_id: int, physiotherapy_diagnosis: schemas.PhysiotherapyDiagnosisCreate, db: T_Session):
+    return crud.create_physiotherapy_diagnosis(db=db, physiotherapy_diagnosis=physiotherapy_diagnosis, patient_id=patient_id)
+
+
+@router.get('/patients/{patient_id}/physiotherapy_diagnosis/', response_model=list[schemas.PhysiotherapyDiagnosis], tags=['physiotherapy_diagnosis'])
+def read_physiotherapy_diagnosis_for_patient(db: T_Session, patient_id: int, skip: int = 0, limit: int = 10):
+    return crud.get_physiotherapy_diagnosis(db=db, patient_id=patient_id, skip=skip, limit=limit)
+
+
+@router.put('/physiotherapy_diagnosis/{diagnosis_id}', response_model=schemas.PhysiotherapyDiagnosis, tags=['physiotherapy_diagnosis'])
+def update_physiotherapy_diagnosis(diagnosis_id: int, physiotherapy_diagnosis: schemas.PhysiotherapyDiagnosisCreate, db: T_Session):
+    db_physiotherapy_diagnosis = crud.update_physiotherapy_diagnosis(db=db, diagnosis_id=diagnosis_id, physiotherapy_diagnosis=physiotherapy_diagnosis)
+    if db_physiotherapy_diagnosis is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Physiotherapy Diagnosis not found')
+    return db_physiotherapy_diagnosis
+
+
+@router.delete('/physiotherapy_diagnosis/{diagnosis_id}', response_model=schemas.PhysiotherapyDiagnosis, tags=['physiotherapy_diagnosis'])
+def delete_physiotherapy_diagnosis(diagnosis_id: int, db: T_Session):
+    db_physiotherapy_diagnosis = crud.delete_physiotherapy_diagnosis(db=db, diagnosis_id=diagnosis_id)
+    if db_physiotherapy_diagnosis is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Physiotherapy Diagnosis not found')
+    return db_physiotherapy_diagnosis
+
+
+# Routes for Prognosis
+@router.post('/patients/{patient_id}/prognosis/', response_model=schemas.Prognosis, tags=['prognosis'])
+def create_prognosis_for_patient(patient_id: int, prognosis: schemas.PrognosisCreate, db: T_Session):
+    return crud.create_prognosis(db=db, prognosis=prognosis, patient_id=patient_id)
+
+
+@router.get('/patients/{patient_id}/prognosis/', response_model=list[schemas.Prognosis], tags=['prognosis'])
+def read_prognosis_for_patient(db: T_Session, patient_id: int, skip: int = 0, limit: int = 10):
+    return crud.get_prognosis(db=db, patient_id=patient_id, skip=skip, limit=limit)
+
+
+@router.put('/prognosis/{prognosis_id}', response_model=schemas.Prognosis, tags=['prognosis'])
+def update_prognosis(prognosis_id: int, prognosis: schemas.PrognosisCreate, db: T_Session):
+    db_prognosis = crud.update_prognosis(db=db, prognosis_id=prognosis_id, prognosis=prognosis)
+    if db_prognosis is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Prognosis not found')
+    return db_prognosis
+
+
+@router.delete('/prognosis/{prognosis_id}', response_model=schemas.Prognosis, tags=['prognosis'])
+def delete_prognosis(prognosis_id: int, db: T_Session):
+    db_prognosis = crud.delete_prognosis(db=db, prognosis_id=prognosis_id)
+    if db_prognosis is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Prognosis not found')
+    return db_prognosis
+
+
+# Routes for Treatment Plan
+@router.post('/patients/{patient_id}/treatment_plan/', response_model=schemas.TreatmentPlan, tags=['treatment_plan'])
+def create_treatment_plan_for_patient(patient_id: int, treatment_plan: schemas.TreatmentPlanCreate, db: T_Session):
+    return crud.create_treatment_plan(db=db, treatment_plan=treatment_plan, patient_id=patient_id)
+
+
+@router.get('/patients/{patient_id}/treatment_plan/', response_model=list[schemas.TreatmentPlan], tags=['treatment_plan'])
+def read_treatment_plan_for_patient(db: T_Session, patient_id: int, skip: int = 0, limit: int = 10):
+    return crud.get_treatment_plan(db=db, patient_id=patient_id, skip=skip, limit=limit)
+
+
+@router.put('/treatment_plan/{plan_id}', response_model=schemas.TreatmentPlan, tags=['treatment_plan'])
+def update_treatment_plan(plan_id: int, treatment_plan: schemas.TreatmentPlanCreate, db: T_Session):
+    db_treatment_plan = crud.update_treatment_plan(db=db, plan_id=plan_id, treatment_plan=treatment_plan)
+    if db_treatment_plan is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Treatment Plan not found')
+    return db_treatment_plan
+
+
+@router.delete('/treatment_plan/{plan_id}', response_model=schemas.TreatmentPlan, tags=['treatment_plan'])
+def delete_treatment_plan(plan_id: int, db: T_Session):
+    db_treatment_plan = crud.delete_treatment_plan(db=db, plan_id=plan_id)
+    if db_treatment_plan is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Treatment Plan not found')
+    return db_treatment_plan
+
+
+# Routes for Professional
+@router.post('/professionals/', response_model=schemas.Professional, tags=['professionals'])
+def create_professional(professional: schemas.ProfessionalCreate, db: T_Session):
+    return crud.create_professional(db=db, professional=professional)
+
+
+@router.get('/professionals/{professional_id}', response_model=schemas.Professional, tags=['professionals'])
+def read_professional(professional_id: int, db: T_Session):
+    db_professional = crud.get_professional(db, professional_id=professional_id)
+    if db_professional is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Professional not found')
+    return db_professional
+
+
+@router.get('/professionals/', response_model=list[schemas.Professional], tags=['professionals'])
+def read_professionals(db: T_Session, skip: int = 0, limit: int = 10):
+    professionals = crud.get_professionals(db, skip=skip, limit=limit)
+    return professionals
+
+
+@router.put('/professionals/{professional_id}', response_model=schemas.Professional, tags=['professionals'])
+def update_professional(professional_id: int, professional: schemas.ProfessionalCreate, db: T_Session):
+    db_professional = crud.update_professional(db=db, professional_id=professional_id, professional=professional)
+    if db_professional is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Professional not found')
+    return db_professional
+
+
+@router.delete('/professionals/{professional_id}', response_model=schemas.Professional, tags=['professionals'])
+def delete_professional(professional_id: int, db: T_Session):
+    db_professional = crud.delete_professional(db=db, professional_id=professional_id)
+    if db_professional is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Professional not found')
+    return db_professional
+
+
+# Routes for Evolution Record
+@router.post('/patients/{patient_id}/evolution_records/', response_model=schemas.EvolutionRecords, tags=['evolution_records'])
+def create_evolution_records_for_patient(patient_id: int, evolution_records: schemas.EvolutionRecordsCreate, db: T_Session):
+    return crud.create_evolution_record(db=db, evolution_record=evolution_records, patient_id=patient_id)
+
+
+@router.get('/patients/{patient_id}/evolution_records/', response_model=list[schemas.EvolutionRecords], tags=['evolution_records'])
+def read_evolution_records_for_patient(db: T_Session, patient_id: int, skip: int = 0, limit: int = 10):
+    return crud.get_evolution_record(db=db, patient_id=patient_id, skip=skip, limit=limit)
+
+
+@router.put('/evolution_records/{record_id}', response_model=schemas.EvolutionRecords, tags=['evolution_records'])
+def update_evolution_records(record_id: int, evolution_records: schemas.EvolutionRecordsCreate, db: T_Session):
+    db_evolution_records = crud.update_evolution_record(db=db, record_id=record_id, evolution_records=evolution_records)
+    if db_evolution_records is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Evolution Record not found')
+    return db_evolution_records
+
+
+@router.delete('/evolution_records/{record_id}', response_model=schemas.EvolutionRecords, tags=['evolution_records'])
+def delete_evolution_records(record_id: int, db: T_Session):
+    db_evolution_records = crud.delete_evolution_record(db=db, record_id=record_id)
+    if db_evolution_records is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Evolution Record not found')
+    return db_evolution_records

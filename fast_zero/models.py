@@ -1,9 +1,15 @@
 from datetime import datetime
+from enum import Enum
 
 from sqlalchemy import ForeignKey, func
-from sqlalchemy.orm import Mapped, mapped_column, registry
+from sqlalchemy.orm import Mapped, mapped_column, registry, relationship
 
 table_registry = registry()
+
+
+class Position(Enum):
+    physiotherapist = 'physiotherapist'
+    intern = 'intern'
 
 
 @table_registry.mapped_as_dataclass
@@ -21,7 +27,7 @@ class User:
 class Patient:
     __tablename__ = 'patients'
 
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    patient_id: Mapped[int] = mapped_column(init=False, primary_key=True)
     full_name: Mapped[str]
     age: Mapped[int]
     place_of_birth: Mapped[str]
@@ -30,6 +36,14 @@ class Patient:
     profession: Mapped[str]
     residential_address: Mapped[str]
     commercial_address: Mapped[str]
+
+    clinical_history = relationship('ClinicalHistory', back_populates='patient')
+    clinical_examination = relationship('ClinicalExamination', back_populates='patient')
+    complementary_exams = relationship('ComplementaryExams', back_populates='patient')
+    physiotherapy_diagnosis = relationship('PhysiotherapyDiagnosis', back_populates='patient')
+    prognosis = relationship('Prognosis', back_populates='patient')
+    treatment_plan = relationship('TreatmentPlan', back_populates='patient')
+    evolution_records = relationship('EvolutionRecords', back_populates='patient')
 
 
 @table_registry.mapped_as_dataclass
@@ -45,6 +59,8 @@ class ClinicalHistory:
     personal_family_history: Mapped[str]
     other_information: Mapped[str] = None
 
+    patient = relationship('Patient', back_populates='clinical_history')
+
 
 @table_registry.mapped_as_dataclass
 class ClinicalExamination:
@@ -54,14 +70,18 @@ class ClinicalExamination:
     patient_id: Mapped[int] = mapped_column(ForeignKey('patients.id'))
     exam_details: Mapped[str]
 
+    patient = relationship('Patient', back_populates='clinical_examination')
+
 
 @table_registry.mapped_as_dataclass
-class ComplementaryExam:
+class ComplementaryExams:
     __tablename__ = 'complementary_exams'
 
     exam_id: Mapped[int] = mapped_column(init=False, primary_key=True)
     patient_id: Mapped[int] = mapped_column(ForeignKey('patients.id'))
     exam_details: Mapped[str]
+
+    patient = relationship('Patient', back_populates='ccomplementary_exams')
 
 
 @table_registry.mapped_as_dataclass
@@ -72,6 +92,8 @@ class PhysiotherapyDiagosis:
     patient_id: Mapped[int] = mapped_column(ForeignKey('patients.id'))
     diagnosis_details: Mapped[str]
 
+    patient = relationship('Patient', back_populates='physiotherapy_diagnosis')
+
 
 @table_registry.mapped_as_dataclass
 class Prognosis:
@@ -80,6 +102,8 @@ class Prognosis:
     prognosis_id: Mapped[int] = mapped_column(init=False, primary_key=True)
     patient_id: Mapped[int] = mapped_column(ForeignKey('patients.id'))
     prognosis_details: Mapped[str]
+
+    patient = relationship('Patient', back_populates='prognosis')
 
 
 @table_registry.mapped_as_dataclass
@@ -91,3 +115,33 @@ class TreatmentPlan:
     objectives: Mapped[str]
     probable_sessions: Mapped[int]
     procedures: Mapped[str]
+
+    patient = relationship('Patient', back_populates='treatment_plan')
+
+
+@table_registry.mapped_as_dataclass
+class Professional:
+    __tablename__ = 'professionals'
+
+    professional_id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    full_name: Mapped[str]
+    position: Mapped[Position]
+    registration_number: Mapped[str]
+
+    evolution_records = relationship('EvolutionRecords', back_populates='professional')
+
+
+@table_registry.mapped_as_dataclass
+class EvolutionRecords:
+    __tablename__ = 'evolution_records'
+
+    record_id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    patient_id: Mapped[int] = mapped_column(ForeignKey('patients.id'))
+    professional_id: Mapped[int] = mapped_column(ForeignKey('professionals.id'))
+    date = Mapped[datetime]
+    procedures: Mapped[str]
+    complications: Mapped[str]
+    heath_status_evolution: Mapped[str]
+
+    patient = relationship('Patient', back_populates='evolution_records')
+    professional = relationship('Professional', back_populates='evolution_records')

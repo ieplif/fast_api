@@ -38,9 +38,7 @@ def test_list_physiotherapy_diagnosis_should_return_5_physiotherapy_diagnosis(se
     assert len(response.json()['physiotherapy_diagnosis']) == expected_physiotherapy_diagnosis
 
 
-def test_list_physiotherapy_diagnosis_filter_diagnosis_details_should_return_5_physiotherapy_diagnosis(
-    session, client, token
-):
+def test_list_physiotherapy_diagnosis_filter_diagnosis_details_should_return_5_physiotherapy_diagnosis(session, client, token):
     expected_physiotherapy_diagnosis = 5
     session.bulk_save_objects(PatientFactory.create_batch(5))
     session.bulk_save_objects(PhysiotherapyDiagnosisFactory.create_batch(5, diagnosis_details='diagnosis_details'))
