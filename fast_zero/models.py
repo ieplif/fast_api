@@ -85,7 +85,7 @@ class ComplementaryExams:
 
 
 @table_registry.mapped_as_dataclass
-class PhysiotherapyDiagosis:
+class PhysiotherapyDiagnosis:
     __tablename__ = 'physiotherapy_diagnosis'
 
     diagnosis_id: Mapped[int] = mapped_column(init=False, primary_key=True)

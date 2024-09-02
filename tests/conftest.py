@@ -11,9 +11,9 @@ from fast_zero.database import get_session
 from fast_zero.models import (
     ClinicalExamination,
     ClinicalHistory,
-    ComplementaryExam,
+    ComplementaryExams,
     Patient,
-    PhysiotherapyDiagosis,
+    PhysiotherapyDiagnosis,
     Prognosis,
     TreatmentPlan,
     User,
@@ -68,7 +68,7 @@ class ClinicalExaminationFactory(factory.Factory):
 
 class ComplementaryExamFactory(factory.Factory):
     class Meta:
-        model = ComplementaryExam
+        model = ComplementaryExams
 
     exam_details = factory.Faker('text')
     patient_id = 1
@@ -76,7 +76,7 @@ class ComplementaryExamFactory(factory.Factory):
 
 class PhysiotherapyDiagnosisFactory(factory.Factory):
     class Meta:
-        model = PhysiotherapyDiagosis
+        model = PhysiotherapyDiagnosis
 
     diagnosis_details = factory.Faker('text')
     patient_id = 1
