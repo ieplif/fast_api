@@ -40,9 +40,10 @@ def update_patient(patient_id: int, patient: schemas.PatientUpdate, db: T_Sessio
     update_data = patient.dict(exclude_unset=True)
     for key, value in update_data.items():
         setattr(db_patient, key, value)
-    
+
     db.commit()
     return db_patient
+
 
 @router.delete('/patients/{patient_id}', response_model=schemas.Message, tags=['patients'])
 def delete_patient(patient_id: int, db: T_Session):
@@ -71,11 +72,12 @@ def update_clinical_history(history_id: int, clinical_history: schemas.ClinicalH
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Clinical History not found.')
     return db_clinical_history
 
+
 @router.delete('/clinical_history/{history_id}', response_model=schemas.Message, tags=['clinical_history'])
 def delete_clinical_history(history_id: int, db: T_Session):
     db_clinical_history = crud.delete_clinical_history(db=db, history_id=history_id)
     if db_clinical_history is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Clinical History not found.')    
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Clinical History not found.')
     return {'message': 'Task has been deleted successfully.'}
 
 

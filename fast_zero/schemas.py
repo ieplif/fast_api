@@ -72,6 +72,7 @@ class PatientUpdate(BaseModel):
     residential_address: Optional[str] = None
     commercial_address: Optional[str] = None
 
+
 # Schemas para ClinicalHistory (Histórico Clínico)
 class ClinicalHistoryBase(BaseModel):
     main_complaint: Optional[str]

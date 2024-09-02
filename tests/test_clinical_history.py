@@ -1,7 +1,8 @@
 from http import HTTPStatus
 
-from tests.conftest import ClinicalHistoryFactory, PatientFactory
 from fast_zero import models
+from tests.conftest import ClinicalHistoryFactory, PatientFactory
+
 
 def test_create_clinical_history(client, token, session):
     # Cria um paciente usando a factory
@@ -24,10 +25,8 @@ def test_create_clinical_history(client, token, session):
         headers={'Authorization': f'Bearer {token}'},
     )
 
-    
-    assert response.status_code == HTTPStatus.CREATED 
+    assert response.status_code == HTTPStatus.CREATED
 
-    
     response_data = response.json()
     assert response_data['patient_id'] == patient.patient_id
     assert response_data['main_complaint'] == 'clinical_history.main_complaint,'
@@ -44,10 +43,8 @@ def test_list_clinical_history_should_return_5_clinical_history(session, client,
     session.add(patient)
     session.commit()
     session.refresh(patient)
-    
-    session.bulk_save_objects(
-        ClinicalHistoryFactory.create_batch(5, patient_id=patient.patient_id)
-    )
+
+    session.bulk_save_objects(ClinicalHistoryFactory.create_batch(5, patient_id=patient.patient_id))
     session.commit()
 
     response = client.get(
@@ -55,21 +52,20 @@ def test_list_clinical_history_should_return_5_clinical_history(session, client,
         headers={'Authorization': f'Bearer {token}'},
     )
 
-    assert response.status_code == HTTPStatus.OK 
+    assert response.status_code == HTTPStatus.OK
 
     response_data = response.json()
     assert len(response_data) == expected_clinical_histories
 
 
 def test_list_clinical_history_for_patient_should_return_5_clinical_history(session, client, token):
+    expected_clinical_histories = 5
     patient = PatientFactory()
     session.add(patient)
     session.commit()
     session.refresh(patient)
 
-    session.bulk_save_objects(
-        ClinicalHistoryFactory.create_batch(5, patient_id=patient.patient_id)
-    )
+    session.bulk_save_objects(ClinicalHistoryFactory.create_batch(5, patient_id=patient.patient_id))
     session.commit()
 
     response = client.get(
@@ -77,10 +73,10 @@ def test_list_clinical_history_for_patient_should_return_5_clinical_history(sess
         headers={'Authorization': f'Bearer {token}'},
     )
 
-    assert response.status_code == HTTPStatus.OK 
+    assert response.status_code == HTTPStatus.OK
 
     response_data = response.json()
-    assert len(response_data) == 5
+    assert len(response_data) == expected_clinical_histories
 
 
 def test_delete_clinical_history(session, client, token):
@@ -93,7 +89,7 @@ def test_delete_clinical_history(session, client, token):
     # Faz a requisição para deletar o histórico clínico
     response = client.delete(
         f'/clinical_history/{clinical_history.history_id}',  # Corrigido para corresponder à rota
-        headers={'Authorization': f'Bearer {token}'}
+        headers={'Authorization': f'Bearer {token}'},
     )
 
     # Verifica o status da resposta
@@ -105,10 +101,7 @@ def test_delete_clinical_history(session, client, token):
 
 
 def test_delete_clinical_history_error(client, token):
-    response = client.delete(
-        f'/clinical_history/{10}', 
-        headers={'Authorization': f'Bearer {token}'}
-    )
+    response = client.delete(f'/clinical_history/{10}', headers={'Authorization': f'Bearer {token}'})
 
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert response.json() == {'detail': 'Clinical History not found.'}
@@ -129,6 +122,7 @@ def test_patch_clinical_history(session, client, token):
     assert response.status_code == HTTPStatus.OK
     data = response.json()
     assert data['main_complaint'] == 'Dor pélvica'
+
 
 """
 def test_patch_clinic_history_error(client, token):

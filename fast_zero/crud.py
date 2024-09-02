@@ -64,7 +64,7 @@ def update_clinical_history(db: Session, history_id: int, updated_data: schemas.
     update_data = updated_data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(db_clinical_history, key, value)
-    
+
     db.commit()
     db.refresh(db_clinical_history)
     return db_clinical_history
