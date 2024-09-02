@@ -62,6 +62,16 @@ class Patient(PatientBase):
         from_attributes = True
 
 
+class PatientUpdate(BaseModel):
+    full_name: Optional[str] = None
+    age: Optional[int] = None
+    place_of_birth: Optional[str] = None
+    marital_status: Optional[str] = None
+    gender: Optional[str] = None
+    profession: Optional[str] = None
+    residential_address: Optional[str] = None
+    commercial_address: Optional[str] = None
+
 # Schemas para ClinicalHistory (Histórico Clínico)
 class ClinicalHistoryBase(BaseModel):
     main_complaint: Optional[str]

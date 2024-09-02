@@ -32,20 +32,25 @@ def read_patients(db: T_Session, skip: int = 0, limit: int = 10):
     return patients
 
 
-@router.put('/patients/{patient_id}', response_model=schemas.Patient, tags=['patients'])
-def update_patient(patient_id: int, patient: schemas.PatientCreate, db: T_Session):
+@router.patch('/patients/{patient_id}', response_model=schemas.Patient, tags=['patients'])
+def update_patient(patient_id: int, patient: schemas.PatientUpdate, db: T_Session):
     db_patient = crud.update_patient(db=db, patient_id=patient_id, patient=patient)
     if db_patient is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Patient not found')
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Patient not found.')
+    update_data = patient.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_patient, key, value)
+    
+    db.commit()
     return db_patient
 
-
-@router.delete('/patients/{patient_id}', response_model=schemas.Patient, tags=['patients'])
+@router.delete('/patients/{patient_id}', response_model=schemas.Message, tags=['patients'])
 def delete_patient(patient_id: int, db: T_Session):
     db_patient = crud.delete_patient(db=db, patient_id=patient_id)
     if db_patient is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Patient not found')
-    return db_patient
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Patient not found.')
+    crud.delete_patient(db, patient_id=patient_id)
+    return {'message': 'Task has been deleted successfully.'}
 
 
 # Routes for Clinical History
