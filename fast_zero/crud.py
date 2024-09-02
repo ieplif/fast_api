@@ -56,12 +56,15 @@ def create_clinical_history(db: Session, clinical_history: schemas.ClinicalHisto
     return db_clinical_history
 
 
-def update_clinical_history(db: Session, history_id: int, clinical_history: schemas.ClinicalHistoryCreate):
-    db_clinical_history = get_clinical_history(db, history_id)
-    if not db_clinical_history:
+def update_clinical_history(db: Session, history_id: int, updated_data: schemas.ClinicalHistoryUpdate):
+    db_clinical_history = db.query(models.ClinicalHistory).filter(models.ClinicalHistory.history_id == history_id).first()
+    if db_clinical_history is None:
         return None
-    for key, value in clinical_history.model_dump().items():
+
+    update_data = updated_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
         setattr(db_clinical_history, key, value)
+    
     db.commit()
     db.refresh(db_clinical_history)
     return db_clinical_history

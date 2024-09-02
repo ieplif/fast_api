@@ -94,6 +94,15 @@ class ClinicalHistory(ClinicalHistoryBase):
         from_attributes = True
 
 
+class ClinicalHistoryUpdate(BaseModel):
+    main_complaint: Optional[str] = None
+    disease_history: Optional[str] = None
+    lifestyle_habits: Optional[str] = None
+    previous_treatments: Optional[str] = None
+    personal_family_history: Optional[str] = None
+    other_information: Optional[str] = None
+
+
 # Schemas para ClinicalExamination (Exame Clínico)
 class ClinicalExaminationBase(BaseModel):
     exam_details: Optional[str]

@@ -54,7 +54,7 @@ def delete_patient(patient_id: int, db: T_Session):
 
 
 # Routes for Clinical History
-@router.post('/patients/{patient_id}/clinical_history/', response_model=schemas.ClinicalHistory, tags=['clinical_history'])
+@router.post('/patients/{patient_id}/clinical_history/', response_model=schemas.ClinicalHistory, status_code=201, tags=['clinical_history'])
 def create_clinical_history_for_patient(patient_id: int, clinical_history: schemas.ClinicalHistoryCreate, db: T_Session):
     return crud.create_clinical_history(db=db, clinical_history=clinical_history, patient_id=patient_id)
 
@@ -64,20 +64,19 @@ def read_clinical_history_for_patient(db: T_Session, patient_id: int, skip: int 
     return crud.get_clinical_histories(db=db, patient_id=patient_id, skip=skip, limit=limit)
 
 
-@router.put('/clinical_history/{history_id}', response_model=schemas.ClinicalHistory, tags=['clinical_history'])
-def update_clinical_history(history_id: int, clinical_history: schemas.ClinicalHistoryCreate, db: T_Session):
-    db_clinical_history = crud.update_clinical_history(db=db, history_id=history_id, clinical_history=clinical_history)
+@router.patch('/clinical_history/{history_id}', response_model=schemas.ClinicalHistory, tags=['clinical_history'])
+def update_clinical_history(history_id: int, clinical_history: schemas.ClinicalHistoryUpdate, db: T_Session):
+    db_clinical_history = crud.update_clinical_history(db=db, history_id=history_id, updated_data=clinical_history)
     if db_clinical_history is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Clinical History not found')
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Clinical History not found.')
     return db_clinical_history
 
-
-@router.delete('/clinical_history/{history_id}', response_model=schemas.ClinicalHistory, tags=['clinical_history'])
+@router.delete('/clinical_history/{history_id}', response_model=schemas.Message, tags=['clinical_history'])
 def delete_clinical_history(history_id: int, db: T_Session):
     db_clinical_history = crud.delete_clinical_history(db=db, history_id=history_id)
     if db_clinical_history is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Clinical History not found')
-    return db_clinical_history
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Clinical History not found.')    
+    return {'message': 'Task has been deleted successfully.'}
 
 
 # Routes for Clinical Examination
