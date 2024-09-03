@@ -78,11 +78,11 @@ def delete_clinical_history(history_id: int, db: T_Session):
     db_clinical_history = crud.delete_clinical_history(db=db, history_id=history_id)
     if db_clinical_history is None:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Clinical History not found.')
-    return {'message': 'Task has been deleted successfully.'}
+    return {'message': 'Clinical history has been deleted successfully.'}
 
 
 # Routes for Clinical Examination
-@router.post('/patients/{patient_id}/clinical_examination/', response_model=schemas.ClinicalExamination, tags=['clinical_examination'])
+@router.post('/patients/{patient_id}/clinical_examination/', response_model=schemas.ClinicalExamination, status_code=201, tags=['clinical_examination'])
 def create_clinical_examination_for_patient(patient_id: int, clinical_examination: schemas.ClinicalExaminationCreate, db: T_Session):
     return crud.create_clinical_examination(db=db, clinical_examination=clinical_examination, patient_id=patient_id)
 
@@ -92,20 +92,20 @@ def read_clinical_examination_for_patient(db: T_Session, patient_id: int, skip: 
     return crud.get_clinical_examinations(db=db, patient_id=patient_id, skip=skip, limit=limit)
 
 
-@router.put('/clinical_examination/{exam_id}', response_model=schemas.ClinicalExamination, tags=['clinical_examination'])
-def update_clinical_examination(exam_id: int, clinical_examination: schemas.ClinicalExaminationCreate, db: T_Session):
-    db_clinical_examination = crud.update_clinical_examination(db=db, exam_id=exam_id, clinical_examination=clinical_examination)
+@router.patch('/clinical_examination/{exam_id}', response_model=schemas.ClinicalExamination, tags=['clinical_examination'])
+def update_clinical_examination(exam_id: int, clinical_examination: schemas.ClinicalExaminationUpdate, db: T_Session):
+    db_clinical_examination = crud.update_clinical_examination(db=db, exam_id=exam_id, update_data=clinical_examination)
     if db_clinical_examination is None:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Clinical Examination not found')
     return db_clinical_examination
 
 
-@router.delete('/clinical_examination/{exam_id}', response_model=schemas.ClinicalExamination, tags=['clinical_examination'])
+@router.delete('/clinical_examination/{exam_id}', response_model=schemas.Message, tags=['clinical_examination'])
 def delete_clinical_examination(exam_id: int, db: T_Session):
     db_clinical_examination = crud.delete_clinical_examination(db=db, exam_id=exam_id)
     if db_clinical_examination is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Clinical Examination not found')
-    return db_clinical_examination
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Clinical Examination not found.')
+    return {'message': 'Clinical examination has been deleted successfully.'}
 
 
 # Routes for Complementary Exams

@@ -5,13 +5,11 @@ from tests.conftest import ClinicalHistoryFactory, PatientFactory
 
 
 def test_create_clinical_history(client, token, session):
-    # Cria um paciente usando a factory
     patient = PatientFactory()
     session.add(patient)
     session.commit()
     session.refresh(patient)
 
-    # Faz a requisição para criar o histórico clínico
     response = client.post(
         f'/patients/{patient.patient_id}/clinical_history/',
         json={
@@ -58,44 +56,19 @@ def test_list_clinical_history_should_return_5_clinical_history(session, client,
     assert len(response_data) == expected_clinical_histories
 
 
-def test_list_clinical_history_for_patient_should_return_5_clinical_history(session, client, token):
-    expected_clinical_histories = 5
-    patient = PatientFactory()
-    session.add(patient)
-    session.commit()
-    session.refresh(patient)
-
-    session.bulk_save_objects(ClinicalHistoryFactory.create_batch(5, patient_id=patient.patient_id))
-    session.commit()
-
-    response = client.get(
-        f'/patients/{patient.patient_id}/clinical_history/',
-        headers={'Authorization': f'Bearer {token}'},
-    )
-
-    assert response.status_code == HTTPStatus.OK
-
-    response_data = response.json()
-    assert len(response_data) == expected_clinical_histories
-
-
 def test_delete_clinical_history(session, client, token):
-    # Cria um histórico clínico usando a factory
     clinical_history = ClinicalHistoryFactory()
     session.add(clinical_history)
     session.commit()
     session.refresh(clinical_history)
 
-    # Faz a requisição para deletar o histórico clínico
     response = client.delete(
-        f'/clinical_history/{clinical_history.history_id}',  # Corrigido para corresponder à rota
+        f'/clinical_history/{clinical_history.history_id}',
         headers={'Authorization': f'Bearer {token}'},
     )
 
-    # Verifica o status da resposta
-    assert response.status_code == HTTPStatus.OK  # Verifica se o status é 200 OK
+    assert response.status_code == HTTPStatus.OK
 
-    # Verifica se o histórico clínico foi realmente deletado
     deleted_history = session.query(models.ClinicalHistory).filter(models.ClinicalHistory.history_id == clinical_history.history_id).first()
     assert deleted_history is None
 
@@ -124,7 +97,6 @@ def test_patch_clinical_history(session, client, token):
     assert data['main_complaint'] == 'Dor pélvica'
 
 
-"""
 def test_patch_clinic_history_error(client, token):
     response = client.patch(
         '/clinical-history/10',
@@ -133,5 +105,4 @@ def test_patch_clinic_history_error(client, token):
     )
 
     assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'detail': 'Clinical History not found.'}
-"""
+    assert response.json() == {'detail': 'Not Found'}

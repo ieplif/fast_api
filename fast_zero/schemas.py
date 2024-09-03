@@ -121,6 +121,10 @@ class ClinicalExamination(ClinicalExaminationBase):
         from_attributes = True
 
 
+class ClinicalExaminationUpdate(BaseModel):
+    exam_details: Optional[str] = None
+
+
 # Schemas para ComplementaryExams (Exames Complementares)
 class ComplementaryExamsBase(BaseModel):
     exam_details: Optional[str]

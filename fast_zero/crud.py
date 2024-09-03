@@ -95,11 +95,13 @@ def create_clinical_examination(db: Session, clinical_examination: schemas.Clini
     return db_clinical_examination
 
 
-def update_clinical_examination(db: Session, exam_id: int, clinical_examination: schemas.ClinicalExaminationCreate):
-    db_clinical_examination = get_clinical_examination(db, exam_id)
+def update_clinical_examination(db: Session, exam_id: int, update_data: schemas.ClinicalExaminationUpdate):
+    db_clinical_examination = db.query(models.ClinicalExamination).filter(models.ClinicalExamination.exam_id == exam_id).first()
     if not db_clinical_examination:
         return None
-    for key, value in clinical_examination.model_dump().items():
+
+    update_data = update_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
         setattr(db_clinical_examination, key, value)
     db.commit()
     db.refresh(db_clinical_examination)
