@@ -109,9 +109,9 @@ def delete_clinical_examination(exam_id: int, db: T_Session):
 
 
 # Routes for Complementary Exams
-@router.post('/patients/{patient_id}/complementary_exams/', response_model=schemas.ComplementaryExams, tags=['complementary_exams'])
-def create_complementary_exams_for_patient(patient_id: int, complementary_exams: schemas.ComplementaryExamsCreate, db: T_Session):
-    return crud.create_complementary_exams(db=db, complementary_exams=complementary_exams, patient_id=patient_id)
+@router.post('/patients/{patient_id}/complementary_exams/', response_model=schemas.ComplementaryExams, status_code=201, tags=['complementary_exams'])
+def create_complementary_exams_for_patient(patient_id: int, complementary_exam: schemas.ComplementaryExamsCreate, db: T_Session):
+    return crud.create_complementary_exams(db=db, complementary_exam=complementary_exam, patient_id=patient_id)
 
 
 @router.get('/patients/{patient_id}/complementary_exams/', response_model=list[schemas.ComplementaryExams], tags=['complementary_exams'])
@@ -119,20 +119,20 @@ def read_complementary_exams_for_patient(db: T_Session, patient_id: int, skip: i
     return crud.get_complementary_exams(db=db, patient_id=patient_id, skip=skip, limit=limit)
 
 
-@router.put('/complementary_exams/{exam_id}', response_model=schemas.ComplementaryExams, tags=['complementary_exams'])
-def update_complementary_exams(exam_id: int, complementary_exams: schemas.ComplementaryExamsCreate, db: T_Session):
-    db_complementary_exams = crud.update_complementary_exams(db=db, exam_id=exam_id, complementary_exams=complementary_exams)
+@router.patch('/complementary_exams/{comp_exam_id}', response_model=schemas.ComplementaryExams, tags=['complementary_exams'])
+def update_complementary_exam(comp_exam_id: int, complementary_exams: schemas.ComplementaryExamsUpdate, db: T_Session):
+    db_complementary_exams = crud.update_complementary_exam(db=db, comp_exam_id=comp_exam_id, update_data=complementary_exams)
     if db_complementary_exams is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Complementary Exams not found')
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Complementary Exams not found.')
     return db_complementary_exams
 
 
-@router.delete('/complementary_exams/{exam_id}', response_model=schemas.ComplementaryExams, tags=['complementary_exams'])
-def delete_complementary_exams(exam_id: int, db: T_Session):
-    db_complementary_exams = crud.delete_complementary_exams(db=db, exam_id=exam_id)
+@router.delete('/complementary_exams/{comp_exam_id}', response_model=schemas.Message, tags=['complementary_exams'])
+def delete_complementary_exam(comp_exam_id: int, db: T_Session):
+    db_complementary_exams = crud.delete_complementary_exam(db=db, comp_exam_id=comp_exam_id)
     if db_complementary_exams is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Complementary Exams not found')
-    return db_complementary_exams
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Complementary Exams not found.')
+    return {'message': 'Complementary exams has been deleted successfully.'}
 
 
 # Routes for Physiotherapy Diagnosis

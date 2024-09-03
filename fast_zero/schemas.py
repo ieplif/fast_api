@@ -142,6 +142,10 @@ class ComplementaryExams(ComplementaryExamsBase):
         from_attributes = True
 
 
+class ComplementaryExamsUpdate(BaseModel):
+    exam_details: Optional[str] = None
+
+
 # Schemas para PhysiotherapyDiagnosis (Diagnóstico Fisioterapêutico)
 class PhysiotherapyDiagnosisBase(BaseModel):
     diagnosis_details: Optional[str]

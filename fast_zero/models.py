@@ -77,7 +77,7 @@ class ClinicalExamination:
 class ComplementaryExams:
     __tablename__ = 'complementary_exams'
 
-    exam_id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    comp_exam_id: Mapped[int] = mapped_column(init=False, primary_key=True)
     patient_id: Mapped[int] = mapped_column(ForeignKey('patients.patient_id'))
     exam_details: Mapped[str]
 

@@ -125,7 +125,7 @@ def get_complementary_exams(db: Session, patient_id: int, skip: int = 0, limit: 
     return db.query(models.ComplementaryExams).filter(models.ComplementaryExams.patient_id == patient_id).offset(skip).limit(limit).all()
 
 
-def create_complementary_exam(db: Session, complementary_exam: schemas.ComplementaryExamsCreate, patient_id: int):
+def create_complementary_exams(db: Session, complementary_exam: schemas.ComplementaryExamsCreate, patient_id: int):
     db_complementary_exam = models.ComplementaryExams(**complementary_exam.model_dump(), patient_id=patient_id)
     db.add(db_complementary_exam)
     db.commit()
@@ -133,11 +133,13 @@ def create_complementary_exam(db: Session, complementary_exam: schemas.Complemen
     return db_complementary_exam
 
 
-def update_complementary_exam(db: Session, comp_exam_id: int, complementary_exam: schemas.ComplementaryExamsCreate):
-    db_complementary_exam = get_complementary_exam(db, comp_exam_id)
+def update_complementary_exam(db: Session, comp_exam_id: int, update_data: schemas.ComplementaryExamsUpdate):
+    db_complementary_exam = db.query(models.ComplementaryExams).filter(models.ComplementaryExams.comp_exam_id == comp_exam_id).first()
     if not db_complementary_exam:
         return None
-    for key, value in complementary_exam.model_dump().items():
+    
+    update_data = update_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
         setattr(db_complementary_exam, key, value)
     db.commit()
     db.refresh(db_complementary_exam)
