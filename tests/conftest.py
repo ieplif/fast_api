@@ -16,6 +16,8 @@ from fast_zero.models import (
     PhysiotherapyDiagnosis,
     Prognosis,
     TreatmentPlan,
+    Professional,
+    Position,
     User,
     table_registry,
 )
@@ -98,6 +100,15 @@ class TreatmentPlanFactory(factory.Factory):
     objectives = factory.Faker('text')
     probable_sessions = factory.Faker('random_int', min=1, max=10)
     procedures = factory.Faker('text')
+
+
+class ProfessionalFactory(factory.Factory):
+    class Meta:
+        model = Professional
+
+    full_name = factory.Faker('name')
+    position = factory.Iterator([Position.physiotherapist, Position.intern])
+    registration_number = factory.Faker('bothify', text='######')
 
 
 @pytest.fixture()

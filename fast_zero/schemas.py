@@ -233,6 +233,12 @@ class Professional(ProfessionalBase):
         from_attributes = True
 
 
+class ProfessionalUpdate(BaseModel):
+    full_name: Optional[str] = None
+    position: Optional[Position] = None
+    registration_number: Optional[str] = None
+
+
 # Schemas para EvolutionRecords (Registros de Evolução)
 class EvolutionRecordsBase(BaseModel):
     date: Optional[date]

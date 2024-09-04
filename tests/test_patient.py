@@ -47,11 +47,9 @@ def test_list_patients_filter_full_name_should_return_5_patients(session, client
         '/patients/?full_name=Maria Aparecida',
         headers={'Authorization': f'Bearer {token}'},
     )
-
-    # Captura o JSON da resposta
+    
     response_data = response.json()
 
-    # Verifica se a resposta é uma lista e o número de pacientes
     assert isinstance(response_data, list)
     assert len(response_data) == expected_patients
 
@@ -78,7 +76,9 @@ def test_delete_patient(session, client, token):
     session.commit()
     session.refresh(patient)
 
-    response = client.delete(f'/patients/{patient.patient_id}', headers={'Authorization': f'Bearer {token}'})
+    response = client.delete(
+        f'/patients/{patient.patient_id}', 
+        headers={'Authorization': f'Bearer {token}'})
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {'message': 'Task has been deleted successfully.'}

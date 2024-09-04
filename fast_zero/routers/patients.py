@@ -37,7 +37,7 @@ def update_patient(patient_id: int, patient: schemas.PatientUpdate, db: T_Sessio
     db_patient = crud.update_patient(db=db, patient_id=patient_id, patient=patient)
     if db_patient is None:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Patient not found.')
-    update_data = patient.dict(exclude_unset=True)
+    update_data = patient.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(db_patient, key, value)
 
@@ -50,7 +50,6 @@ def delete_patient(patient_id: int, db: T_Session):
     db_patient = crud.delete_patient(db=db, patient_id=patient_id)
     if db_patient is None:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Patient not found.')
-    crud.delete_patient(db, patient_id=patient_id)
     return {'message': 'Task has been deleted successfully.'}
 
 
@@ -216,7 +215,7 @@ def delete_treatment_plan(plan_id: int, db: T_Session):
 
 
 # Routes for Professional
-@router.post('/professionals/', response_model=schemas.Professional, tags=['professionals'])
+@router.post('/professionals/', response_model=schemas.Professional, status_code=201, tags=['professionals'])
 def create_professional(professional: schemas.ProfessionalCreate, db: T_Session):
     return crud.create_professional(db=db, professional=professional)
 
@@ -235,20 +234,25 @@ def read_professionals(db: T_Session, skip: int = 0, limit: int = 10):
     return professionals
 
 
-@router.put('/professionals/{professional_id}', response_model=schemas.Professional, tags=['professionals'])
-def update_professional(professional_id: int, professional: schemas.ProfessionalCreate, db: T_Session):
+@router.patch('/professionals/{professional_id}', response_model=schemas.Professional, tags=['professionals'])
+def update_professional(professional_id: int, professional: schemas.ProfessionalUpdate, db: T_Session):
     db_professional = crud.update_professional(db=db, professional_id=professional_id, professional=professional)
     if db_professional is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Professional not found')
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Professional not found.')
+    update_data = professional.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_professional, key, value)
+
+    db.commit()
     return db_professional
 
 
-@router.delete('/professionals/{professional_id}', response_model=schemas.Professional, tags=['professionals'])
+@router.delete('/professionals/{professional_id}', response_model=schemas.Message, tags=['professionals'])
 def delete_professional(professional_id: int, db: T_Session):
     db_professional = crud.delete_professional(db=db, professional_id=professional_id)
     if db_professional is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Professional not found')
-    return db_professional
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Professional not found.')
+    return {'message': 'Professional has been deleted successfully.'}
 
 
 # Routes for Evolution Record
