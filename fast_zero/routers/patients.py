@@ -189,30 +189,30 @@ def delete_prognosis(prognosis_id: int, db: T_Session):
 
 
 # Routes for Treatment Plan
-@router.post('/patients/{patient_id}/treatment_plan/', response_model=schemas.TreatmentPlan, tags=['treatment_plan'])
+@router.post('/patients/{patient_id}/treatment_plan/', response_model=schemas.TreatmentPlan, status_code=201, tags=['treatment_plan'])
 def create_treatment_plan_for_patient(patient_id: int, treatment_plan: schemas.TreatmentPlanCreate, db: T_Session):
     return crud.create_treatment_plan(db=db, treatment_plan=treatment_plan, patient_id=patient_id)
 
 
 @router.get('/patients/{patient_id}/treatment_plan/', response_model=list[schemas.TreatmentPlan], tags=['treatment_plan'])
 def read_treatment_plan_for_patient(db: T_Session, patient_id: int, skip: int = 0, limit: int = 10):
-    return crud.get_treatment_plan(db=db, patient_id=patient_id, skip=skip, limit=limit)
+    return crud.get_treatment_plans(db=db, patient_id=patient_id, skip=skip, limit=limit)
 
 
-@router.put('/treatment_plan/{plan_id}', response_model=schemas.TreatmentPlan, tags=['treatment_plan'])
-def update_treatment_plan(plan_id: int, treatment_plan: schemas.TreatmentPlanCreate, db: T_Session):
-    db_treatment_plan = crud.update_treatment_plan(db=db, plan_id=plan_id, treatment_plan=treatment_plan)
+@router.patch('/treatment_plan/{plan_id}', response_model=schemas.TreatmentPlan, tags=['treatment_plan'])
+def update_treatment_plan(plan_id: int, treatment_plan: schemas.TreatmentPlanUpdate, db: T_Session):
+    db_treatment_plan = crud.update_treatment_plan(db=db, plan_id=plan_id, update_data=treatment_plan)
     if db_treatment_plan is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Treatment Plan not found')
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Treatment Plan not found.')
     return db_treatment_plan
 
 
-@router.delete('/treatment_plan/{plan_id}', response_model=schemas.TreatmentPlan, tags=['treatment_plan'])
+@router.delete('/treatment_plan/{plan_id}', response_model=schemas.Message, tags=['treatment_plan'])
 def delete_treatment_plan(plan_id: int, db: T_Session):
     db_treatment_plan = crud.delete_treatment_plan(db=db, plan_id=plan_id)
     if db_treatment_plan is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Treatment Plan not found')
-    return db_treatment_plan
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Treatment Plan not found.')
+    return {'message': 'Treatment plan has been deleted successfully.'}
 
 
 # Routes for Professional

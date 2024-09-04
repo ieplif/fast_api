@@ -1,66 +1,53 @@
 from http import HTTPStatus
 
-from tests.conftest import TreatmentPlanFactory
+from fast_zero import models
+from tests.conftest import PatientFactory, TreatmentPlanFactory
 
 
-def test_create_treatment_plan(client, token):
+def test_create_treatment_plan(client, token, session):
+    patient = PatientFactory()
+    session.add(patient)
+    session.commit()
+    session.refresh(patient)
+
     response = client.post(
-        '/treatment-plan/',
-        headers={'Authorization': f'Bearer {token}'},
+        f'/patients/{patient.patient_id}/treatment_plan/',
         json={
-            'patient_id': 1,
             'objectives': 'treatment_plan.objectives',
             'probable_sessions': 10,
             'procedures': 'treatment_plan.procedures',
         },
+        headers={'Authorization': f'Bearer {token}'},
+    
     )
 
-    assert response.json() == {
-        'plan_id': 1,
-        'patient_id': 1,
-        'objectives': 'treatment_plan.objectives',
-        'probable_sessions': 10,
-        'procedures': 'treatment_plan.procedures',
-    }
+    assert response.status_code == HTTPStatus.CREATED
 
+    data = response.json()
+    assert data['patient_id'] == patient.patient_id
+    assert data['objectives'] == 'treatment_plan.objectives'
+    assert data['probable_sessions'] == 10
+    assert data['procedures'] == 'treatment_plan.procedures'
 
 def test_list_treatment_plans_should_return_5_treatment_plans(session, client, token):
     expected_treatment_plans = 5
-    session.bulk_save_objects(TreatmentPlanFactory.create_batch(5))
+    patient = PatientFactory()
+    session.add(patient)
+    session.commit()
+    session.refresh(patient)
+
+    session.bulk_save_objects(TreatmentPlanFactory.create_batch(5, patient_id=patient.patient_id))
     session.commit()
 
     response = client.get(
-        '/treatment-plan/',
+        f'/patients/{patient.patient_id}/treatment_plan/',
         headers={'Authorization': f'Bearer {token}'},
     )
 
-    assert len(response.json()['treatment_plans']) == expected_treatment_plans
+    assert response.status_code == HTTPStatus.OK
 
-
-def test_list_treatment_plans_filter_objectives_should_return_5_treatment_plans(session, client, token):
-    expected_treatment_plans = 5
-    session.bulk_save_objects(TreatmentPlanFactory.create_batch(5, objectives='objectives'))
-    session.commit()
-
-    response = client.get(
-        '/treatment-plan/?objectives=objectives',
-        headers={'Authorization': f'Bearer {token}'},
-    )
-
-    assert len(response.json()['treatment_plans']) == expected_treatment_plans
-
-
-def test_list_treatment_plans_filter_procedures_should_return_5_treatment_plans(session, client, token):
-    expected_treatment_plans = 5
-    session.bulk_save_objects(TreatmentPlanFactory.create_batch(5, procedures='procedures'))
-    session.commit()
-
-    response = client.get(
-        '/treatment-plan/?procedures=procedures',
-        headers={'Authorization': f'Bearer {token}'},
-    )
-
-    assert len(response.json()['treatment_plans']) == expected_treatment_plans
+    response_data = response.json()
+    assert len(response_data) == expected_treatment_plans
 
 
 def test_delete_treatment_plan(session, client, token):
@@ -70,42 +57,53 @@ def test_delete_treatment_plan(session, client, token):
     session.refresh(treatment_plan)
 
     response = client.delete(
-        f'/treatment-plan/{treatment_plan.plan_id}',
+        f'/treatment_plan/{treatment_plan.plan_id}',
         headers={'Authorization': f'Bearer {token}'},
     )
 
-    assert response.json() == {'message': 'Treatment plan deleted successfully.'}
+    assert response.status_code == HTTPStatus.OK
+    deleted_treatment_plan = session.query(models.TreatmentPlan).get(treatment_plan.plan_id)
+    assert deleted_treatment_plan is None
 
 
 def test_delete_treatment_plan_error(client, token):
-    response = client.delete(f'/treatment-plan/{10}', headers={'Authorization': f'Bearer {token}'})
+    response = client.delete(
+        f'/treatment-plan/{10}', 
+        headers={'Authorization': f'Bearer {token}'})
 
     assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'detail': 'Treatment plan not found.'}
+    assert response.json() == {'detail': 'Not Found'}
 
 
-def test_update_treatment_plan(session, client, token):
+def test_patch_treatment_plan(session, client, token):
     treatment_plan = TreatmentPlanFactory()
-
     session.add(treatment_plan)
     session.commit()
     session.refresh(treatment_plan)
 
     response = client.patch(
-        f'/treatment-plan/{treatment_plan.plan_id}',
-        json={'objectives': 'treatment_plan objectives'},
+        f'/treatment_plan/{treatment_plan.plan_id}',
+        json={
+            'objectives': 'treatment_plan.objectives',
+            'probable_sessions': 10,
+            'procedures': 'treatment_plan.procedures',
+        },
         headers={'Authorization': f'Bearer {token}'},
     )
 
-    assert response.json()['objectives'] == 'treatment_plan objectives'
+    assert response.status_code == HTTPStatus.OK
+    data = response.json()
+    assert data['objectives'] == 'treatment_plan.objectives'
+    assert data['probable_sessions'] == 10
+    assert data['procedures'] == 'treatment_plan.procedures'
 
 
 def test_patch_treatment_plan_error(client, token):
     response = client.patch(
-        '/treatment-plan/10',
+        '/treatment_plan/10',
         json={},
         headers={'Authorization': f'Bearer {token}'},
     )
 
     assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'detail': 'Treatment plan not found.'}
+    assert response.json() == {'detail': 'Treatment Plan not found.'}

@@ -207,6 +207,12 @@ class TreatmentPlan(TreatmentPlanBase):
         from_attributes = True
 
 
+class TreatmentPlanUpdate(BaseModel):
+    objectives: Optional[str] = None
+    probable_sessions: Optional[int] = None
+    procedures: Optional[str] = None
+
+
 # Schemas para Professional (Profissionais)
 class ProfessionalBase(BaseModel):
     full_name: Optional[str]

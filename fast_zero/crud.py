@@ -246,11 +246,12 @@ def create_treatment_plan(db: Session, treatment_plan: schemas.TreatmentPlanCrea
     return db_treatment_plan
 
 
-def update_treatment_plan(db: Session, plan_id: int, treatment_plan: schemas.TreatmentPlanCreate):
+def update_treatment_plan(db: Session, plan_id: int, update_data: schemas.TreatmentPlanUpdate):
     db_treatment_plan = get_treatment_plan(db, plan_id)
     if not db_treatment_plan:
         return None
-    for key, value in treatment_plan.model_dump().items():
+    update_data = update_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
         setattr(db_treatment_plan, key, value)
     db.commit()
     db.refresh(db_treatment_plan)
