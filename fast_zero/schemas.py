@@ -184,6 +184,10 @@ class Prognosis(PrognosisBase):
         from_attributes = True
 
 
+class PrognosisUpdate(BaseModel):
+    prognosis_details: Optional[str] = None
+
+
 # Schemas para TreatmentPlan (Plano de Tratamento)
 class TreatmentPlanBase(BaseModel):
     objectives: Optional[str]

@@ -209,11 +209,12 @@ def create_prognosis(db: Session, prognosis: schemas.PrognosisCreate, patient_id
     return db_prognosis
 
 
-def update_prognosis(db: Session, prognosis_id: int, prognosis: schemas.PrognosisCreate):
+def update_prognosis(db: Session, prognosis_id: int, update_data: schemas.PrognosisUpdate):
     db_prognosis = get_prognosis(db, prognosis_id)
     if not db_prognosis:
         return None
-    for key, value in prognosis.model_dump().items():
+    update_data = update_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
         setattr(db_prognosis, key, value)
     db.commit()
     db.refresh(db_prognosis)

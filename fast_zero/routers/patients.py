@@ -162,30 +162,30 @@ def delete_physiotherapy_diagnosis(diagnosis_id: int, db: T_Session):
     return {'message': 'Physiotherapy diagnosis has been deleted successfully.'}
 
 # Routes for Prognosis
-@router.post('/patients/{patient_id}/prognosis/', response_model=schemas.Prognosis, tags=['prognosis'])
+@router.post('/patients/{patient_id}/prognosis/', response_model=schemas.Prognosis, status_code=201, tags=['prognosis'])
 def create_prognosis_for_patient(patient_id: int, prognosis: schemas.PrognosisCreate, db: T_Session):
     return crud.create_prognosis(db=db, prognosis=prognosis, patient_id=patient_id)
 
 
 @router.get('/patients/{patient_id}/prognosis/', response_model=list[schemas.Prognosis], tags=['prognosis'])
 def read_prognosis_for_patient(db: T_Session, patient_id: int, skip: int = 0, limit: int = 10):
-    return crud.get_prognosis(db=db, patient_id=patient_id, skip=skip, limit=limit)
+    return crud.get_prognoses(db=db, patient_id=patient_id, skip=skip, limit=limit)
 
 
-@router.put('/prognosis/{prognosis_id}', response_model=schemas.Prognosis, tags=['prognosis'])
-def update_prognosis(prognosis_id: int, prognosis: schemas.PrognosisCreate, db: T_Session):
-    db_prognosis = crud.update_prognosis(db=db, prognosis_id=prognosis_id, prognosis=prognosis)
+@router.patch('/prognosis/{prognosis_id}', response_model=schemas.Prognosis, tags=['prognosis'])
+def update_prognosis(prognosis_id: int, prognosis: schemas.PrognosisUpdate, db: T_Session):
+    db_prognosis = crud.update_prognosis(db=db, prognosis_id=prognosis_id, update_data=prognosis)
     if db_prognosis is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Prognosis not found')
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Prognosis not found.')
     return db_prognosis
 
 
-@router.delete('/prognosis/{prognosis_id}', response_model=schemas.Prognosis, tags=['prognosis'])
+@router.delete('/prognosis/{prognosis_id}', response_model=schemas.Message, tags=['prognosis'])
 def delete_prognosis(prognosis_id: int, db: T_Session):
     db_prognosis = crud.delete_prognosis(db=db, prognosis_id=prognosis_id)
     if db_prognosis is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Prognosis not found')
-    return db_prognosis
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Prognosis not found.')
+    return {'message': 'Prognosis has been deleted successfully.'}
 
 
 # Routes for Treatment Plan

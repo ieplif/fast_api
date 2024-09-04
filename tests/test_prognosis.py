@@ -1,55 +1,47 @@
 from http import HTTPStatus
 
+from fast_zero import models
 from tests.conftest import PatientFactory, PrognosisFactory
 
 
-def test_create_prognosis(client, token):
+def test_create_prognosis(client, token, session):
+    patient = PatientFactory()
+    session.add(patient)
+    session.commit()
+    session.refresh(patient)
+
     response = client.post(
-        '/prognosis/',
-        headers={'Authorization': f'Bearer {token}'},
-        json={
-            'patient_id': 1,
-            'prognosis_details': 'prognosis prognosis_details',
-        },
+        f'/patients/{patient.patient_id}/prognosis/',
+        json={'prognosis_details': 'prognosis prognosis_details'},
+        headers={'Authorization': f'Bearer {token}'},     
     )
 
-    assert response.json() == {
-        'prognosis_id': 1,
-        'patient_id': 1,
-        'prognosis_details': 'prognosis prognosis_details',
-    }
+    assert response.status_code == HTTPStatus.CREATED
+
+    data = response.json()
+    assert data['patient_id'] == patient.patient_id
+    assert data['prognosis_details'] == 'prognosis prognosis_details'
 
 
 def test_list_prognosis_should_return_5_prognosis(session, client, token):
     expected_prognosis = 5
-    session.bulk_save_objects(
-        PatientFactory.create_batch(
-            5,
-        )
-    )
-    session.bulk_save_objects(PrognosisFactory.create_batch(5))
+    patient = PatientFactory()
+    session.add(patient)
+    session.commit()
+    session.refresh(patient)
+
+    session.bulk_save_objects(PrognosisFactory.create_batch(5, patient_id=patient.patient_id))
     session.commit()
 
     response = client.get(
-        '/prognosis/',
+        f'/patients/{patient.patient_id}/prognosis/',
         headers={'Authorization': f'Bearer {token}'},
     )
 
-    assert len(response.json()['prognosis']) == expected_prognosis
+    assert response.status_code == HTTPStatus.OK
 
-
-def test_list_prognosis_filter_prognosis_details_should_return_5_prognosis(session, client, token):
-    expected_prognosis = 5
-    session.bulk_save_objects(PatientFactory.create_batch(5))
-    session.bulk_save_objects(PrognosisFactory.create_batch(5, prognosis_details='prognosis_details'))
-    session.commit()
-
-    response = client.get(
-        '/prognosis/?prognosis_details=prognosis_details',
-        headers={'Authorization': f'Bearer {token}'},
-    )
-
-    assert len(response.json()['prognosis']) == expected_prognosis
+    response_data = response.json()
+    assert len(response_data) == expected_prognosis
 
 
 def test_delete_prognosis(session, client, token):
@@ -64,12 +56,13 @@ def test_delete_prognosis(session, client, token):
     )
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == {'message': 'Prognosis has been deleted successfully.'}
+    deleted_prognosis = session.query(models.Prognosis).get(prognosis.prognosis_id)
+    assert deleted_prognosis is None
 
 
 def test_delete_prognosis_error(client, token):
     response = client.delete(
-        '/prognosis/1',
+        f'/prognosis/{10}',
         headers={'Authorization': f'Bearer {token}'},
     )
 
@@ -79,7 +72,6 @@ def test_delete_prognosis_error(client, token):
 
 def test_patch_prognosis(session, client, token):
     prognosis = PrognosisFactory()
-
     session.add(prognosis)
     session.commit()
     session.refresh(prognosis)
@@ -91,7 +83,8 @@ def test_patch_prognosis(session, client, token):
     )
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json()['prognosis_details'] == 'prognosis prognosis_details'
+    data = response.json()
+    assert data['prognosis_details'] == 'prognosis prognosis_details'
 
 
 def test_patch_prognosis_error(client, token):
