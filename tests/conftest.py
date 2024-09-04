@@ -14,10 +14,10 @@ from fast_zero.models import (
     ComplementaryExams,
     Patient,
     PhysiotherapyDiagnosis,
+    Position,
+    Professional,
     Prognosis,
     TreatmentPlan,
-    Professional,
-    Position,
     User,
     table_registry,
 )

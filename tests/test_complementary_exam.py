@@ -14,7 +14,6 @@ def test_create_complementary_exams(client, token, session):
         f'/patients/{patient.patient_id}/complementary_exams/',
         json={'exam_details': 'complementary_exam exam_details'},
         headers={'Authorization': f'Bearer {token}'},
-       
     )
 
     assert response.status_code == HTTPStatus.CREATED

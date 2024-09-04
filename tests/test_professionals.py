@@ -4,7 +4,6 @@ from tests.conftest import ProfessionalFactory
 
 
 def test_create_prognosis(client, token):
-
     response = client.post(
         '/professionals/',
         json={
@@ -12,13 +11,13 @@ def test_create_prognosis(client, token):
             'position': 'physiotherapist',
             'registration_number': 'registration_number',
         },
-        headers={'Authorization': f'Bearer {token}'},     
+        headers={'Authorization': f'Bearer {token}'},
     )
 
     assert response.json() == {
         'professional_id': 1,
-        'full_name': 'fullname',	
-        'position': 'physiotherapist',	
+        'full_name': 'fullname',
+        'position': 'physiotherapist',
         'registration_number': 'registration_number',
         'evolution_records': [],
     }

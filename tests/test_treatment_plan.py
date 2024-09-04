@@ -3,6 +3,8 @@ from http import HTTPStatus
 from fast_zero import models
 from tests.conftest import PatientFactory, TreatmentPlanFactory
 
+PROBABLE_SESSIONS = 10
+
 
 def test_create_treatment_plan(client, token, session):
     patient = PatientFactory()
@@ -18,7 +20,6 @@ def test_create_treatment_plan(client, token, session):
             'procedures': 'treatment_plan.procedures',
         },
         headers={'Authorization': f'Bearer {token}'},
-    
     )
 
     assert response.status_code == HTTPStatus.CREATED
@@ -26,8 +27,9 @@ def test_create_treatment_plan(client, token, session):
     data = response.json()
     assert data['patient_id'] == patient.patient_id
     assert data['objectives'] == 'treatment_plan.objectives'
-    assert data['probable_sessions'] == 10
+    assert data['probable_sessions'] == PROBABLE_SESSIONS
     assert data['procedures'] == 'treatment_plan.procedures'
+
 
 def test_list_treatment_plans_should_return_5_treatment_plans(session, client, token):
     expected_treatment_plans = 5
@@ -67,9 +69,7 @@ def test_delete_treatment_plan(session, client, token):
 
 
 def test_delete_treatment_plan_error(client, token):
-    response = client.delete(
-        f'/treatment-plan/{10}', 
-        headers={'Authorization': f'Bearer {token}'})
+    response = client.delete(f'/treatment-plan/{10}', headers={'Authorization': f'Bearer {token}'})
 
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert response.json() == {'detail': 'Not Found'}
@@ -94,7 +94,7 @@ def test_patch_treatment_plan(session, client, token):
     assert response.status_code == HTTPStatus.OK
     data = response.json()
     assert data['objectives'] == 'treatment_plan.objectives'
-    assert data['probable_sessions'] == 10
+    assert data['probable_sessions'] == PROBABLE_SESSIONS
     assert data['procedures'] == 'treatment_plan.procedures'
 
 

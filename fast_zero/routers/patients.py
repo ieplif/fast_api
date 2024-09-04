@@ -160,6 +160,7 @@ def delete_physiotherapy_diagnosis(diagnosis_id: int, db: T_Session):
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Physiotherapy Diagnosis not found')
     return {'message': 'Physiotherapy diagnosis has been deleted successfully.'}
 
+
 # Routes for Prognosis
 @router.post('/patients/{patient_id}/prognosis/', response_model=schemas.Prognosis, status_code=201, tags=['prognosis'])
 def create_prognosis_for_patient(patient_id: int, prognosis: schemas.PrognosisCreate, db: T_Session):

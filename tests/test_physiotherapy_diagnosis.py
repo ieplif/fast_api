@@ -13,7 +13,7 @@ def test_create_physiotherapy_diagnosis(client, token, session):
     response = client.post(
         f'/patients/{patient.patient_id}/physiotherapy_diagnosis/',
         json={'diagnosis_details': 'physiotherapy_diagnosis diagnosis_details'},
-        headers={'Authorization': f'Bearer {token}'},   
+        headers={'Authorization': f'Bearer {token}'},
     )
 
     assert response.status_code == HTTPStatus.CREATED
@@ -34,7 +34,7 @@ def test_list_physiotherapy_diagnosis_should_return_5_physiotherapy_diagnosis(se
     session.commit()
 
     response = client.get(
-          f'/patients/{patient.patient_id}/physiotherapy_diagnosis/',
+        f'/patients/{patient.patient_id}/physiotherapy_diagnosis/',
         headers={'Authorization': f'Bearer {token}'},
     )
 
@@ -42,7 +42,6 @@ def test_list_physiotherapy_diagnosis_should_return_5_physiotherapy_diagnosis(se
 
     response_data = response.json()
     assert len(response_data) == expected_physiotherapy_diagnosis
-
 
 
 def test_delete_physiotherapy_diagnosis(session, client, token):

@@ -13,7 +13,7 @@ def test_create_prognosis(client, token, session):
     response = client.post(
         f'/patients/{patient.patient_id}/prognosis/',
         json={'prognosis_details': 'prognosis prognosis_details'},
-        headers={'Authorization': f'Bearer {token}'},     
+        headers={'Authorization': f'Bearer {token}'},
     )
 
     assert response.status_code == HTTPStatus.CREATED

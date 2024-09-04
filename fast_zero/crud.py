@@ -137,7 +137,7 @@ def update_complementary_exam(db: Session, comp_exam_id: int, update_data: schem
     db_complementary_exam = db.query(models.ComplementaryExams).filter(models.ComplementaryExams.comp_exam_id == comp_exam_id).first()
     if not db_complementary_exam:
         return None
-    
+
     update_data = update_data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(db_complementary_exam, key, value)
@@ -175,7 +175,7 @@ def update_physiotherapy_diagnosis(db: Session, diagnosis_id: int, update_data: 
     db_physiotherapy_diagnosis = get_physiotherapy_diagnosis(db, diagnosis_id)
     if not db_physiotherapy_diagnosis:
         return None
-    
+
     update_data = update_data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(db_physiotherapy_diagnosis, key, value)
