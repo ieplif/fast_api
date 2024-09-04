@@ -215,7 +215,7 @@ def delete_treatment_plan(plan_id: int, db: T_Session):
 
 
 # Routes for Professional
-@router.post('/professionals/', response_model=schemas.Professional, status_code=201, tags=['professionals'])
+@router.post('/professionals/', response_model=schemas.Professional, tags=['professionals'])
 def create_professional(professional: schemas.ProfessionalCreate, db: T_Session):
     return crud.create_professional(db=db, professional=professional)
 

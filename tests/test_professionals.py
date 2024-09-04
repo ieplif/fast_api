@@ -1,6 +1,5 @@
 from http import HTTPStatus
 
-from fast_zero import models
 from tests.conftest import ProfessionalFactory
 
 
@@ -16,12 +15,13 @@ def test_create_prognosis(client, token):
         headers={'Authorization': f'Bearer {token}'},     
     )
 
-    assert response.status_code == HTTPStatus.CREATED
-
-    data = response.json()
-    assert data['full_name'] == 'fullname'
-    assert data['position'] == 'physiotherapist'
-    assert data['registration_number'] == 'registration_number'
+    assert response.json() == {
+        'professional_id': 1,
+        'full_name': 'fullname',	
+        'position': 'physiotherapist',	
+        'registration_number': 'registration_number',
+        'evolution_records': [],
+    }
 
 
 def test_list_professionals_filter_full_name_should_return_5_professionals(session, client, token):
