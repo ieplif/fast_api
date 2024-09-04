@@ -136,31 +136,30 @@ def delete_complementary_exam(comp_exam_id: int, db: T_Session):
 
 
 # Routes for Physiotherapy Diagnosis
-@router.post('/patients/{patient_id}/physiotherapy_diagnosis/', response_model=schemas.PhysiotherapyDiagnosis, tags=['physiotherapy_diagnosis'])
+@router.post('/patients/{patient_id}/physiotherapy_diagnosis/', response_model=schemas.PhysiotherapyDiagnosis, status_code=201, tags=['physiotherapy_diagnosis'])
 def create_physiotherapy_diagnosis_for_patient(patient_id: int, physiotherapy_diagnosis: schemas.PhysiotherapyDiagnosisCreate, db: T_Session):
     return crud.create_physiotherapy_diagnosis(db=db, physiotherapy_diagnosis=physiotherapy_diagnosis, patient_id=patient_id)
 
 
 @router.get('/patients/{patient_id}/physiotherapy_diagnosis/', response_model=list[schemas.PhysiotherapyDiagnosis], tags=['physiotherapy_diagnosis'])
 def read_physiotherapy_diagnosis_for_patient(db: T_Session, patient_id: int, skip: int = 0, limit: int = 10):
-    return crud.get_physiotherapy_diagnosis(db=db, patient_id=patient_id, skip=skip, limit=limit)
+    return crud.get_physiotherapy_diagnoses(db=db, patient_id=patient_id, skip=skip, limit=limit)
 
 
-@router.put('/physiotherapy_diagnosis/{diagnosis_id}', response_model=schemas.PhysiotherapyDiagnosis, tags=['physiotherapy_diagnosis'])
-def update_physiotherapy_diagnosis(diagnosis_id: int, physiotherapy_diagnosis: schemas.PhysiotherapyDiagnosisCreate, db: T_Session):
-    db_physiotherapy_diagnosis = crud.update_physiotherapy_diagnosis(db=db, diagnosis_id=diagnosis_id, physiotherapy_diagnosis=physiotherapy_diagnosis)
+@router.patch('/physiotherapy_diagnosis/{diagnosis_id}', response_model=schemas.PhysiotherapyDiagnosis, tags=['physiotherapy_diagnosis'])
+def update_physiotherapy_diagnosis(diagnosis_id: int, physiotherapy_diagnosis: schemas.PhysiotherapyDiagnosisUpdate, db: T_Session):
+    db_physiotherapy_diagnosis = crud.update_physiotherapy_diagnosis(db=db, diagnosis_id=diagnosis_id, update_data=physiotherapy_diagnosis)
     if db_physiotherapy_diagnosis is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Physiotherapy Diagnosis not found')
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Physiotherapy Diagnosis not found.')
     return db_physiotherapy_diagnosis
 
 
-@router.delete('/physiotherapy_diagnosis/{diagnosis_id}', response_model=schemas.PhysiotherapyDiagnosis, tags=['physiotherapy_diagnosis'])
+@router.delete('/physiotherapy_diagnosis/{diagnosis_id}', response_model=schemas.Message, tags=['physiotherapy_diagnosis'])
 def delete_physiotherapy_diagnosis(diagnosis_id: int, db: T_Session):
     db_physiotherapy_diagnosis = crud.delete_physiotherapy_diagnosis(db=db, diagnosis_id=diagnosis_id)
     if db_physiotherapy_diagnosis is None:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Physiotherapy Diagnosis not found')
-    return db_physiotherapy_diagnosis
-
+    return {'message': 'Physiotherapy diagnosis has been deleted successfully.'}
 
 # Routes for Prognosis
 @router.post('/patients/{patient_id}/prognosis/', response_model=schemas.Prognosis, tags=['prognosis'])

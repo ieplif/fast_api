@@ -171,11 +171,13 @@ def create_physiotherapy_diagnosis(db: Session, physiotherapy_diagnosis: schemas
     return db_physiotherapy_diagnosis
 
 
-def update_physiotherapy_diagnosis(db: Session, diagnosis_id: int, physiotherapy_diagnosis: schemas.PhysiotherapyDiagnosisCreate):
+def update_physiotherapy_diagnosis(db: Session, diagnosis_id: int, update_data: schemas.PhysiotherapyDiagnosisUpdate):
     db_physiotherapy_diagnosis = get_physiotherapy_diagnosis(db, diagnosis_id)
     if not db_physiotherapy_diagnosis:
         return None
-    for key, value in physiotherapy_diagnosis.model_dump().items():
+    
+    update_data = update_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
         setattr(db_physiotherapy_diagnosis, key, value)
     db.commit()
     db.refresh(db_physiotherapy_diagnosis)

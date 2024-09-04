@@ -163,6 +163,10 @@ class PhysiotherapyDiagnosis(PhysiotherapyDiagnosisBase):
         from_attributes = True
 
 
+class PhysiotherapyDiagnosisUpdate(BaseModel):
+    diagnosis_details: Optional[str] = None
+
+
 # Schemas para Prognosis (Prognóstico)
 class PrognosisBase(BaseModel):
     prognosis_details: Optional[str]
