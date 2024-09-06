@@ -138,10 +138,10 @@ class EvolutionRecords:
     record_id: Mapped[int] = mapped_column(init=False, primary_key=True)
     patient_id: Mapped[int] = mapped_column(ForeignKey('patients.patient_id'))
     professional_id: Mapped[int] = mapped_column(ForeignKey('professionals.professional_id'))
-    date = Mapped[datetime]
+    date = Mapped[datetime.date]
     procedures: Mapped[str]
     complications: Mapped[str]
-    heath_status_evolution: Mapped[str]
+    health_status_evolution: Mapped[str]
 
     patient = relationship('Patient', back_populates='evolution_records')
     professional = relationship('Professional', back_populates='evolution_records')
