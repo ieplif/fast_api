@@ -257,9 +257,9 @@ def delete_professional(professional_id: int, db: T_Session):
 
 
 # Routes for Evolution Record
-@router.post('/patients/{patient_id}/evolution_records/', response_model=schemas.EvolutionRecords, tags=['evolution_records'])
-def create_evolution_records_for_patient(patient_id: int, evolution_records: schemas.EvolutionRecordsCreate, db: T_Session):
-    return crud.create_evolution_record(db=db, evolution_record=evolution_records, patient_id=patient_id)
+@router.post('/patients/{patient_id}/evolution_records/', response_model=schemas.EvolutionRecords, tags=['evolution_records'], status_code=201)
+def create_evolution_records_for_patient(patient_id: int, professional_id: int, evolution_records: schemas.EvolutionRecordsCreate, db: T_Session):
+    return crud.create_evolution_record(db=db, evolution_record=evolution_records, patient_id=patient_id, professional_id=professional_id)
 
 
 @router.get('/patients/{patient_id}/evolution_records/', response_model=list[schemas.EvolutionRecords], tags=['evolution_records'])
@@ -267,7 +267,7 @@ def read_evolution_records_for_patient(db: T_Session, patient_id: int, skip: int
     return crud.get_evolution_record(db=db, patient_id=patient_id, skip=skip, limit=limit)
 
 
-@router.put('/evolution_records/{record_id}', response_model=schemas.EvolutionRecords, tags=['evolution_records'])
+@router.patch('/evolution_records/{record_id}', response_model=schemas.EvolutionRecords, tags=['evolution_records'])
 def update_evolution_records(record_id: int, evolution_records: schemas.EvolutionRecordsCreate, db: T_Session):
     db_evolution_records = crud.update_evolution_record(db=db, record_id=record_id, evolution_records=evolution_records)
     if db_evolution_records is None:

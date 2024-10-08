@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import date, datetime
 from enum import Enum
 
-from sqlalchemy import ForeignKey, func
+from sqlalchemy import Date, ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, registry, relationship
 
 table_registry = registry()
@@ -138,7 +138,7 @@ class EvolutionRecords:
     record_id: Mapped[int] = mapped_column(init=False, primary_key=True)
     patient_id: Mapped[int] = mapped_column(ForeignKey('patients.patient_id'))
     professional_id: Mapped[int] = mapped_column(ForeignKey('professionals.professional_id'))
-    date = Mapped[datetime.date]
+    date: Mapped[date] = mapped_column(Date)  # type: ignore
     procedures: Mapped[str]
     complications: Mapped[str]
     health_status_evolution: Mapped[str]

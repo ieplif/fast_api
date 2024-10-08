@@ -12,6 +12,7 @@ from fast_zero.models import (
     ClinicalExamination,
     ClinicalHistory,
     ComplementaryExams,
+    EvolutionRecords,
     Patient,
     PhysiotherapyDiagnosis,
     Position,
@@ -109,6 +110,18 @@ class ProfessionalFactory(factory.Factory):
     full_name = factory.Faker('name')
     position = factory.Iterator([Position.physiotherapist, Position.intern])
     registration_number = factory.Faker('bothify', text='######')
+
+
+class EvolutionRecordsFactory(factory.Factory):
+    class Meta:
+        model = EvolutionRecords
+
+    patient_id = 1
+    professional_id = 1
+    date = factory.Faker('date')
+    procedures = factory.Faker('text')
+    complications = factory.Faker('text')
+    health_status_evolution = factory.Faker('text')
 
 
 @pytest.fixture()

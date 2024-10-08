@@ -245,7 +245,9 @@ class EvolutionRecordsBase(BaseModel):
     procedures: Optional[str]
     complications: Optional[str]
     health_status_evolution: Optional[str]
-    professional_id: Optional[int]
+
+    class Config:
+        orm_mode = True
 
 
 class EvolutionRecordsCreate(EvolutionRecordsBase):
@@ -253,8 +255,9 @@ class EvolutionRecordsCreate(EvolutionRecordsBase):
 
 
 class EvolutionRecords(EvolutionRecordsBase):
-    record_id: int
     patient_id: int
+    professional_id: int
+    record_id: int
 
     class Config:
         from_attributes = True

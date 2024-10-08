@@ -3,7 +3,7 @@ from http import HTTPStatus
 from tests.conftest import ProfessionalFactory
 
 
-def test_create_prognosis(client, token):
+def test_create_professional(client, token):
     response = client.post(
         '/professionals/',
         json={
