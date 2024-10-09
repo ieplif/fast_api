@@ -264,12 +264,12 @@ def create_evolution_records_for_patient(patient_id: int, professional_id: int, 
 
 @router.get('/patients/{patient_id}/evolution_records/', response_model=list[schemas.EvolutionRecords], tags=['evolution_records'])
 def read_evolution_records_for_patient(db: T_Session, patient_id: int, skip: int = 0, limit: int = 10):
-    return crud.get_evolution_record(db=db, patient_id=patient_id, skip=skip, limit=limit)
+    return crud.get_evolution_records(db=db, patient_id=patient_id, skip=skip, limit=limit)
 
 
 @router.patch('/evolution_records/{record_id}', response_model=schemas.EvolutionRecords, tags=['evolution_records'])
-def update_evolution_records(record_id: int, evolution_records: schemas.EvolutionRecordsCreate, db: T_Session):
-    db_evolution_records = crud.update_evolution_record(db=db, record_id=record_id, evolution_records=evolution_records)
+def update_evolution_records(record_id: int, evolution_record: schemas.EvolutionRecordsUpdate, db: T_Session):
+    db_evolution_records = crud.update_evolution_records(db=db, record_id=record_id, evolution_record=evolution_record)
     if db_evolution_records is None:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Evolution Record not found')
     return db_evolution_records
@@ -281,3 +281,32 @@ def delete_evolution_records(record_id: int, db: T_Session):
     if db_evolution_records is None:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Evolution Record not found')
     return db_evolution_records
+
+
+# Routes for Avaliation
+
+
+@router.post('/patients/{patient_id}/avaliation/', response_model=schemas.Avaliation, tags=['avaliation'], status_code=201)
+def create_availation_for_patient(patient_id: int, avaliation: schemas.AvaliationCreate, db: T_Session):
+    return crud.create_avaliation(db=db, avaliation=avaliation, patient_id=patient_id)
+
+
+@router.get('/patients/{patient_id}/avaliation/', response_model=list[schemas.Avaliation], tags=['avaliation'])
+def read_availation_for_patient(db: T_Session, patient_id: int, skip: int = 0, limit: int = 10):
+    return crud.get_avaliations(db=db, patient_id=patient_id, skip=skip, limit=limit)
+
+
+@router.patch('/avaliation/{availation_id}', response_model=schemas.Avaliation, tags=['avaliation'])
+def update_availation(availation_id: int, availation: schemas.AvaliationUpdate, db: T_Session):
+    db_availation = crud.update_avaliation(db=db, availation_id=availation_id, update_data=availation)
+    if db_availation is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Avaliation not found.')
+    return db_availation
+
+
+@router.delete('/avaliation/{availation_id}', response_model=schemas.Message, tags=['avaliation'])
+def delete_availation(availation_id: int, db: T_Session):
+    db_availation = crud.delete_avaliation(db=db, availation_id=availation_id)
+    if db_availation is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Avaliation not found.')
+    return {'message': 'Avaliation has been deleted successfully.'}

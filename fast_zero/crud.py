@@ -319,7 +319,7 @@ def create_evolution_record(db: Session, evolution_record: schemas.EvolutionReco
     return db_evolution_record
 
 
-def update_evolution_record(db: Session, record_id: int, evolution_record: schemas.EvolutionRecordsCreate):
+def update_evolution_records(db: Session, record_id: int, evolution_record: schemas.EvolutionRecordsUpdate):
     db_evolution_record = get_evolution_record(db, record_id)
     if not db_evolution_record:
         return None
@@ -336,3 +336,41 @@ def delete_evolution_record(db: Session, record_id: int):
         db.delete(db_evolution_record)
         db.commit()
     return db_evolution_record
+
+
+# Funções CRUD para Avaliation
+
+
+def get_avaliation(db: Session, avaliation_id: int):
+    return db.query(models.Avaliation).filter(models.Avaliation.avaliation_id == avaliation_id).first()
+
+
+def get_avaliations(db: Session, patient_id: int, skip: int = 0, limit: int = 10):
+    return db.query(models.Avaliation).filter(models.Avaliation.patient_id == patient_id).offset(skip).limit(limit).all()
+
+
+def create_avaliation(db: Session, avaliation: schemas.AvaliationCreate, patient_id: int):
+    db_avaliation = models.Avaliation(**avaliation.model_dump(), patient_id=patient_id)
+    db.add(db_avaliation)
+    db.commit()
+    db.refresh(db_avaliation)
+    return db_avaliation
+
+
+def update_avaliation(db: Session, avaliation_id: int, avaliation: schemas.AvaliationUpdate):
+    db_avaliation = get_avaliation(db, avaliation_id)
+    if not db_avaliation:
+        return None
+    for key, value in avaliation.model_dump().items():
+        setattr(db_avaliation, key, value)
+    db.commit()
+    db.refresh(db_avaliation)
+    return db_avaliation
+
+
+def delete_avaliation(db: Session, avaliation_id: int):
+    db_avaliation = get_avaliation(db, avaliation_id)
+    if db_avaliation:
+        db.delete(db_avaliation)
+        db.commit()
+    return db_avaliation

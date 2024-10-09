@@ -261,3 +261,51 @@ class EvolutionRecords(EvolutionRecordsBase):
 
     class Config:
         from_attributes = True
+
+
+class EvolutionRecordsUpdate(BaseModel):
+    date: Optional[date]
+    procedures: Optional[str]
+    complications: Optional[str]
+    health_status_evolution: Optional[str]
+
+    class Config:
+        orm_mode = True
+
+
+# Base para Avaliation - somente leitura
+class AvaliationBase(BaseModel):
+    professional_id: int
+    clinical_history_id: int
+    clinical_examination_id: int
+    physiotherapy_diagnosis_id: int
+    prognosis_id: int
+    treatment_plan_id: int
+
+    class Config:
+        orm_mode = True
+
+
+# Schema para criação de Avaliation (input)
+class AvaliationCreate(AvaliationBase):
+    pass
+
+
+# Schema completo de Avaliation (response model)
+class Avaliation(AvaliationBase):
+    avaliation_id: int
+    patient_id: int
+
+
+# Schema para atualização de Avaliation (input)
+class AvaliationUpdate(BaseModel):
+    patient_id: Optional[int] = None
+    clinical_history_id: Optional[int] = None
+    clinical_examination_id: Optional[int] = None
+    physiotherapy_diagnosis_id: Optional[int] = None
+    prognosis_id: Optional[int] = None
+    treatment_plan_id: Optional[int] = None
+    professional_id: Optional[int] = None
+
+    class Config:
+        orm_mode = True

@@ -145,3 +145,26 @@ class EvolutionRecords:
 
     patient = relationship('Patient', back_populates='evolution_records')
     professional = relationship('Professional', back_populates='evolution_records')
+
+
+@table_registry.mapped_as_dataclass
+class Avaliation:
+    __tablename__ = 'avaliations'
+
+    avaliation_id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    patient_id: Mapped[int] = mapped_column(ForeignKey('patients.patient_id'))
+    clinical_history_id: Mapped[int] = mapped_column(ForeignKey('clinical_histories.history_id'))
+    clinical_examination_id: Mapped[int] = mapped_column(ForeignKey('clinical_examinations.exam_id'))
+    physiotherapy_diagnosis_id: Mapped[int] = mapped_column(ForeignKey('physiotherapy_diagnosis.diagnosis_id'))
+    prognosis_id: Mapped[int] = mapped_column(ForeignKey('prognosis.prognosis_id'))
+    treatment_plan_id: Mapped[int] = mapped_column(ForeignKey('treatments_plan.plan_id'))
+    professional_id: Mapped[int] = mapped_column(ForeignKey('professionals.professional_id'))
+
+    # Relacionamentos
+    patient = relationship('Patient')
+    clinical_history = relationship('ClinicalHistory')
+    clinical_examination = relationship('ClinicalExamination')
+    physiotherapy_diagnosis = relationship('PhysiotherapyDiagnosis')
+    prognosis = relationship('Prognosis')
+    treatment_plan = relationship('TreatmentPlan')
+    professional = relationship('Professional')

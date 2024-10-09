@@ -1,3 +1,5 @@
+from datetime import date
+
 import factory
 import factory.fuzzy
 import pytest
@@ -9,6 +11,7 @@ from sqlalchemy.pool import StaticPool
 from fast_zero.app import app
 from fast_zero.database import get_session
 from fast_zero.models import (
+    Avaliation,
     ClinicalExamination,
     ClinicalHistory,
     ComplementaryExams,
@@ -118,10 +121,23 @@ class EvolutionRecordsFactory(factory.Factory):
 
     patient_id = 1
     professional_id = 1
-    date = factory.Faker('date')
+    date = factory.LazyFunction(date.today)
     procedures = factory.Faker('text')
     complications = factory.Faker('text')
     health_status_evolution = factory.Faker('text')
+
+
+class AvaliationFactory(factory.Factory):
+    class Meta:
+        model = Avaliation
+
+    patient_id = 1
+    clinical_history_id = 1
+    clinical_examination_id = 1
+    physiotherapy_diagnosis_id = 1
+    prognosis_id = 1
+    treatment_plan_id = 1
+    professional_id = 1
 
 
 @pytest.fixture()
